@@ -1,6 +1,11 @@
-node_modules/
-dist/
-.env
-*.db
+# Server environment
+server/.env
+
+# Admin portal
+admin-portal/.env
+admin-portal/node_modules/
+admin-portal/dist/
+
+# OS
 .DS_Store
-npm-debug.log*
+Thumbs.db

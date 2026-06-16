@@ -12,6 +12,7 @@ LogRaider is a cross-platform desktop log management application with a web-base
 ```
 lograider/
 ├── AGENTS.md                 # This file - implementation tracking
+├── docker-compose.yml        # Docker deployment config
 ├── package.json              # Desktop client dependencies
 ├── src/                      # Desktop client source
 │   ├── main.js               # Electron main process
@@ -22,20 +23,22 @@ lograider/
 │   ├── dashboard.html        # Main desktop app UI
 │   ├── renderer.js           # Desktop client frontend logic
 │   └── styles.css            # Shared styles
-├── server/                   # API Server
+├── server/                   # API Server (Docker)
+│   ├── Dockerfile
 │   ├── package.json
+│   ├── .env.example
 │   └── src/
 │       ├── index.js          # Express entry point
 │       ├── schema.sql        # Canonical SQL schema + seed data
+│       ├── db/               # PostgreSQL connection & migration
 │       ├── routes/           # API route handlers
-│       └── middleware/       # Auth, admin, team middleware
-├── admin-portal/             # Admin web app
-│   ├── package.json
-│   └── src/
-│       ├── App.js
-│       ├── pages/            # Admin pages
-│       ├── components/       # Shared components
-│       └── api.js            # API client for admin portal
+│       ├── middleware/       # Auth, admin, team middleware
+│       ├── websocket/        # Real-time WebSocket server
+│       ├── utils/            # Utility functions
+│       └── lradmin/          # Admin Portal (served at /lradmin)
+│           ├── index.html
+│           ├── css/
+│           └── js/
 └── assets/                   # App icons
 ```
 
@@ -133,6 +136,44 @@ lograider/
 **WebSocket:**
 - `wss://server/ws/:teamId` - Real-time log stream + team updates
 
+### Real-time Sync Architecture
+- WebSocket per team connection
+- Server broadcasts new log entries, member changes, role changes
+- Desktop clients maintain local SQLite, merge conflicts by timestamp
+- Auth via JWT token in WebSocket query parameter
+
+## Deployment
+
+### Docker (Server-side only)
+The API server and PostgreSQL run in Docker containers:
+
+```bash
+# Start server + database
+docker-compose up -d
+
+# View logs
+docker-compose logs -f app
+docker-compose logs -f db
+
+# Stop
+docker-compose down
+
+# Rebuild
+docker-compose up -d --build
+```
+
+**Docker Compose services:**
+- `app` - Node.js Express API server (port 3000)
+- `db` - PostgreSQL 15 (port 5432)
+- Schema auto-initializes from `server/src/schema.sql`
+
+**Environment variables** (copy `.env.example` to `.env`):
+- `DB_PASSWORD` - PostgreSQL password
+- `JWT_SECRET` - JWT signing key
+- `PORT` - Server port (default 3000)
+
+**Desktop client runs locally** (no Docker required).
+
 ## COMMIT & PUSH POLICY
 
 ### ⚠️ IMPORTANT: Commit Rules
@@ -185,11 +226,8 @@ cd server && npm run dev    # With nodemon
 cd server && npm test
 ```
 
-### Admin Portal
-```bash
-cd admin-portal && npm start
-cd admin-portal && npm run build
-```
+### Admin Portal (integrated in server)
+Served automatically at `/lradmin` when server is running.
 
 ## Dependencies
 
@@ -210,10 +248,3 @@ cd admin-portal && npm run build
 - helmet
 - dotenv
 - uuid
-
-### Admin Portal (admin-portal/package.json)
-- react
-- react-dom
-- axios
-- react-router-dom
-- styled-components or tailwindcss
