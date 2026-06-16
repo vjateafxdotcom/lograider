@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+  <title>LogRaider - Login</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="logo">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <rect width="48" height="48" rx="8" fill="#3b82f6"/>
+          <path d="M14 16h20M14 24h14M14 32h20" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h1>LogRaider</h1>
+      <p class="subtitle">Log Management Desktop App</p>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="apiUrl">API Server URL</label>
+          <input
+            type="url"
+            id="apiUrl"
+            placeholder="https://api.lograider.com"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input
+            type="text"
+            id="username"
+            placeholder="Enter your username"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            placeholder="Enter your password"
+            required
+          >
+        </div>
+
+        <div id="error-message" class="error-message"></div>
+
+        <div id="loading" class="loading" style="display: none;">
+          <div class="spinner"></div>
+          <span>Connecting...</span>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="login-btn">
+          Sign In
+        </button>
+      </form>
+
+      <p class="footer-text">
+        Your data is stored locally on your device.
+      </p>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+  <title>LogRaider</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+        <rect width="48" height="48" rx="8" fill="#3b82f6"/>
+        <path d="M14 16h20M14 24h14M14 32h20" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <span class="app-title">LogRaider</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-view="dashboard">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-item" data-view="logs">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Logs
+      </button>
+      <button class="nav-item" data-view="settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info" id="user-info">
+        <div class="user-avatar">U</div>
+        <span class="username" id="current-user">User</span>
+      </div>
+      <button class="btn-logout" id="logout-btn">Logout</button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Dashboard View -->
+    <div class="view active" id="view-dashboard">
+      <header class="top-bar">
+        <h2>Dashboard</h2>
+        <div class="top-bar-actions">
+          <button class="btn btn-secondary" id="export-btn">Export</button>
+          <button class="btn btn-primary" id="add-log-btn">+ Add Log</button>
+        </div>
+      </header>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-total">0</div>
+          <div class="stat-label">Total Logs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-error">0</div>
+          <div class="stat-label">Errors</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-warn">0</div>
+          <div class="stat-label">Warnings</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-info">0</div>
+          <div class="stat-label">Info</div>
+        </div>
+      </div>
+
+      <div class="recent-logs">
+        <h3>Recent Logs</h3>
+        <div id="recent-logs-list" class="logs-list"></div>
+      </div>
+    </div>
+
+    <!-- Logs View -->
+    <div class="view" id="view-logs">
+      <header class="top-bar">
+        <h2>Logs</h2>
+        <div class="top-bar-actions">
+          <input type="text" id="search-input" placeholder="Search logs..." class="search-input">
+          <select id="filter-level" class="filter-select">
+            <option value="">All Levels</option>
+            <option value="error">Error</option>
+            <option value="warn">Warning</option>
+            <option value="info">Info</option>
+            <option value="debug">Debug</option>
+          </select>
+          <select id="filter-source" class="filter-select">
+            <option value="">All Sources</option>
+          </select>
+          <button class="btn btn-secondary" id="export-logs-btn">Export</button>
+          <button class="btn btn-danger" id="clear-logs-btn">Clear All</button>
+        </div>
+      </header>
+
+      <div id="logs-container" class="logs-list"></div>
+    </div>
+
+    <!-- Settings View -->
+    <div class="view" id="view-settings">
+      <header class="top-bar">
+        <h2>Settings</h2>
+      </header>
+
+      <div class="settings-container">
+        <div class="settings-section">
+          <h3>Connection</h3>
+          <div class="form-group">
+            <label for="settings-api-url">API Server URL</label>
+            <input type="url" id="settings-api-url" placeholder="https://api.lograider.com">
+            <p class="help-text">The URL of your LogRaider web service backend.</p>
+          </div>
+          <button class="btn btn-primary" id="save-settings-btn">Save Settings</button>
+        </div>
+
+        <div class="settings-section">
+          <h3>Data Management</h3>
+          <button class="btn btn-secondary" id="export-data-btn">Export All Data</button>
+          <button class="btn btn-danger" id="reset-app-btn">Reset Application</button>
+        </div>
+
+        <div class="settings-section">
+          <h3>About</h3>
+          <p class="text-muted">LogRaider v0.1.0</p>
+          <p class="text-muted">Cross-platform log management desktop application.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Add Log Modal -->
+  <div class="modal" id="add-log-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Add Log Entry</h3>
+        <button class="modal-close" id="close-modal">&times;</button>
+      </div>
+      <form id="add-log-form">
+        <div class="form-group">
+          <label for="log-level">Level</label>
+          <select id="log-level">
+            <option value="info">Info</option>
+            <option value="warn">Warning</option>
+            <option value="error">Error</option>
+            <option value="debug">Debug</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="log-source">Source</label>
+          <input type="text" id="log-source" placeholder="e.g., auth-service">
+        </div>
+        <div class="form-group">
+          <label for="log-message">Message</label>
+          <textarea id="log-message" rows="4" placeholder="Enter log message..." required></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancel-log-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Log</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
