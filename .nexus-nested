@@ -1,0 +1,5 @@
+This repo mirrors nested AGENTS.md and RELEASE_NOTES.md files to Nexus, not just the root.
+
+See ~/codeSync/aistar/docs/agents-md-split-plan.md (Stage 1 engine, Stage 5 per-repo rollout).
+Removing this file makes the mirror read only the root AGENTS.md again -- and it DELETES every
+nested point from Qdrant when it does, so do not remove it casually.
