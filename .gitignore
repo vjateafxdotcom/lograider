@@ -9,3 +9,19 @@ admin-portal/dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Build output — electron-builder writes a 437 MB dist/ (app .zip, .dmg, blockmaps).
+# It is a build artefact, never a source of truth, and committing it would make every
+# clone carry it forever.
+dist/
+
+# Browser-automation scratch from a debugging session (console logs, page snapshots).
+.playwright-mcp/
+
+# A one-off screenshot left in the repo root, not an app asset. The real icons live in
+# assets/ and are referenced by package.json's build config.
+/admin-portal.png
+
+# Dependencies. This repo's documented workflow is `git add .`, which would otherwise stage
+# the entire tree — including the Electron and better-sqlite3 native builds.
+node_modules/

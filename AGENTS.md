@@ -42,6 +42,22 @@ lograider/
 └── assets/                   # App icons
 ```
 
+### Data layer (desktop client)
+
+`src/database.js` exports a wrapper class named **`DatabaseManager`**, and it must keep that name:
+line 1 binds `const Database = require('better-sqlite3')`, so a `class Database` in the same module
+scope is a redeclaration — `SyntaxError: Identifier 'Database' has already been declared` — and the
+module fails to load, which takes the whole Electron app down at `require()` time. Callers are
+unaffected by the name because `main.js` does `const Database = require('./database')`.
+
+The wrapper's public surface is `prepare(sql)` and `close()`. **`main.js` calls
+`db.prepare(...)` directly**, so `prepare()` must stay on the wrapper — it previously exposed only
+`get connection()`, which meant every one of those calls was reaching for a method that did not exist.
+
+`better-sqlite3` is a native module compiled for **Electron's** Node ABI. Running it under the
+system `node` fails with an `NODE_MODULE_VERSION` mismatch (119 vs 137 as of 2026-11-01); that is
+expected, not a bug — `electron-builder` rebuilds it for the target.
+
 ### Data Model
 
 **User**

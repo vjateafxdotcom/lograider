@@ -23,7 +23,12 @@ function createWindow() {
     },
   });
 
-  mainWindow.loadFile(path.join(__dirname, 'index.html'));
+  const htmlPath = path.join(__dirname, 'index.html');
+  try {
+    mainWindow.loadFile(htmlPath);
+  } catch (err) {
+    console.error('Failed to load HTML:', err);
+  }
 
   if (process.argv.includes('--dev')) {
     mainWindow.webContents.openDevTools();
@@ -223,23 +228,42 @@ ipcMain.handle('open-external', async (_event, url) => {
 
 app.whenReady().then(async () => {
   const dbPath = app.getPath('userData');
-  db = new Database(path.join(dbPath, 'lograider.db'));
+  try {
+    db = new Database(path.join(dbPath, 'lograider.db'));
+  } catch (err) {
+    // Silent fail - continue without database
+    console.error('Database init failed:', err.message);
+  }
   apiClient = new ApiClient();
 
   // Check for saved API URL
-  const settings = await ipcMain.handlers['get-settings']();
-  if (settings.apiUrl) {
-    apiClient.setBaseUrl(settings.apiUrl);
+  try {
+    const settings = db.prepare('SELECT * FROM settings').all();
+    const settingsMap = {};
+    for (const row of settings) {
+      settingsMap[row.key] = row.value;
+    }
+    if (settingsMap.apiUrl) {
+      apiClient.setBaseUrl(settingsMap.apiUrl);
+    }
+  } catch (err) {
+    // Settings table may not exist yet
   }
 
   // Check if user is already logged in
-  const token = db.prepare("SELECT value FROM settings WHERE key = 'authToken'").get();
-  if (token) {
-    apiClient.setToken(token.value);
-    const verified = await apiClient.verifyToken();
-    if (!verified.authenticated) {
-      db.prepare("DELETE FROM settings WHERE key = 'authToken'").run();
-      apiClient.clearToken();
+  if (db) {
+    try {
+      const token = db.prepare("SELECT value FROM settings WHERE key = 'authToken'").get();
+      if (token) {
+        apiClient.setToken(token.value);
+        const verified = await apiClient.verifyToken();
+        if (!verified.authenticated) {
+          db.prepare("DELETE FROM settings WHERE key = 'authToken'").run();
+          apiClient.clearToken();
+        }
+      }
+    } catch (err) {
+      console.error('Session check failed:', err.message);
     }
   }
 
